@@ -1,0 +1,25 @@
+---
+prefix: "§2[§c1§f0§d2§ePE§b-§9Thông Báo§2]"
+suffix: "[A]"
+time: 150
+sendmessage-format: "&e[{TIME}] &b[{PREFIX}] {SUFFIX} &a{SENDER}&e>&f {MESSAGE}"
+datetime-format: "H:i:s"
+broadcast-enabled: true
+messages:
+ - "{PREFIX}§c•> §eHãy báo cáo cho server những lỗi bằng lệnh /baoloi"
+ - "{PREFIX}§c•> §eHãy tố cáo những người chơi chửi bậy, phá server, hack, cheat cho server bằng lệnh /tocao"
+ - "{PREFIX}&6•> §bHãy sử dụng /is help để xem cách chơi AcidIsland."
+ - "{PREFIX}&c•> §aĐể kiểm tra tài khoản hoặc mua point xin hãy sử dụng lênh /vitien."
+ - "{PREFIX}&c•> §aĐể xem giá point hãy sử dụng lệnh /giapoint, để xem giá vip sử dụng lệnh /muavip."
+ - "{PREFIX}&c•> §aĐể góp cho server xin hãy sử dụng lệnh /idea để đóng góp ý kiến giúp server phát triển hơn."
+ - "{PREFIX}&c•> §aServer §6Mine§c1§f0§d2§ePE§a có rất nhiều máy chủ xin hãy sử dụng lệnh /allsv để biết thêm."
+ - "{PREFIX}&c•> §aNếu bạn muốn chat,trao đổi với những người chơi khác trong sv pe và pc hãy truy cập CCTALK và dùng ID: 1102531086."
+popup-time: 150
+popup-duration: 10
+sendpopup-format: "{MESSAGE}"
+popup-broadcast-enabled: true
+popups:
+ - "&aĐang có &b{TOTALPLAYERS}&a/&b{MAXPLAYERS}&a người chơi!"
+ - "&aSử dụng /vitien để mua point"
+ - "&aSử dụng /helps để xem các chơi"
+...

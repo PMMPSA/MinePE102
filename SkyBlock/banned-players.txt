@@ -1,0 +1,5 @@
+# Updated 09/02/17 08:08 by Mine102PE 1.0.0BETA
+# victim name | ban date | banned by | banned until | reason
+
+steve|2017-08-27 22:33:14 +0700|CONSOLE|Forever|§b Tên Không Hợp Lệ![
+quandeeptry|2017-09-02 08:08:55 +0600|CONSOLE|Forever|Banned by an operator.

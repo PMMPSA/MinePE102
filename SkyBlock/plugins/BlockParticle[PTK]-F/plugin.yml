@@ -1,0 +1,26 @@
+---
+name: BlockParticle
+author: PTK
+version: 1.0
+api: [2.0.0, 3.0.0]
+load: POSTWORLD
+main: PTK\BlockParticle\Main
+commands:
+ getparticleblock:
+   description: "Get a particle block!"
+   usage: "/gpb <particle> [true | false (solid or not)]"
+   permission: blockparticle.get
+   aliases: [gpb,gb]
+ deleteparticleblock:
+   description: "Delete the particleblock which is underneath you."
+   usage: "/dpb"
+   permission: blockparticle.remove
+   aliases: [dpb,rb]
+permissions: 
+ blockparticle.get:
+   default: op
+ blockparticle.place:
+   default: op
+ blockparticle.remove:
+   default: op
+...

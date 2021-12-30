@@ -1,0 +1,11 @@
+name: ToCao[PTK]
+version: 5.0
+main: PTK\ToCao
+api: [2.0.0, 3.0.0, 3.0.0ALPHA5]
+author: PTK-KienPham
+commands:
+    tocao:
+        description: Lệnh báo cáo cho server!
+permission:
+    tocao.manage:
+        default: false

@@ -1,0 +1,11 @@
+name: GiftCode[PTK]
+main: PTK\GiftCode\Main
+version: 2.0
+author: PTK-KienPham
+api: [2.0.0, 3.0.0]
+description: Plugin GiftCode bởi PTK-KienPham
+commands: 
+  dungcode:
+   description: Sử dụng code.
+  taocode:
+    description: Tạo code mới.

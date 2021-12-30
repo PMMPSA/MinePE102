@@ -1,0 +1,36 @@
+---
+# Config and command/sign-database for CommandShop by BoxOfDevs:
+
+# Messages:
+
+buy.money.success: "{prefix}You successfully bought the command {cmd} for {amount} {unit}!{line}{prefix}The command has already been executed."
+buy.money.miss: "{error}You don't have enough money to buy this command. You would need {amount} {unit}!"
+
+buy.item.success: "{prefix}You successfully bought the command {cmd} with the item {item}!{line}{prefix}The command has already been executed."
+buy.item.miss: "{error}You don't have enough items to buy this command, items needed:{line}Item: {item} Amount: {amount}"
+
+buy.contactadmin: "{line}If you are a normal user, please contact your server administrator!"
+
+command.notfound: "{error}Command {cmd} wasn't found in the list of buyable commands!"
+
+sign.confirm: "{prefix}Tap the sign again to confirm that you want to buy the command {cmd}!"
+sign.noperm: "{error}You don't have the permission to buy commands via signs!"
+sign.nobreak: "{error}You don't have the permission to break CommandShop signs!"
+
+buycmd.disabled: "{error}/buycmd is disabled for this buyable command!"
+
+# List and database of buyable commands:
+
+commands:
+  example:
+    cmds: 
+     - "tp {player} 123 123 123"
+    buycmd: "true"
+    price:
+      paytype: "item"
+      item: "1:0:64"
+
+# List and database for CommandShop signs:
+
+signs: []
+...

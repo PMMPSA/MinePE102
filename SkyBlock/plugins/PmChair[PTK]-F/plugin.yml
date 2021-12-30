@@ -1,0 +1,5 @@
+name: PmChair[PTK]
+main: PTK\PmChair\Main
+author: PTK-KienPham
+version: 1.0
+api: [2.0.0, 3.0.0]

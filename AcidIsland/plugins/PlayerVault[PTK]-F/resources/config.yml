@@ -1,0 +1,25 @@
+---
+# The provider
+# Types: "mysql", "json", "yaml"
+provider: json
+
+# This is needed only if the provider is "mysql"
+mysql:
+  # IP address belonging to the mysql database
+  ip: 127.0.0.1
+  # Mysql user, avoid using "root" for safety precautions.
+  user: root
+  # Password in plain text. Make sure you keep this file a secret.
+  pass: 19283746
+  # Database name to save vaults data in.
+  database: vault
+  # Mysql database port, default: 3306
+  port: 3306
+
+# Max number of vaults that a player *may* have
+max-vaults: 25
+
+# The name of the vault's inventory
+# {VAULTNO} -> The vault number
+vaultinv-name: "Két §l§fSắt§r #{VAULTNO}"
+...

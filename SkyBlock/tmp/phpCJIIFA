@@ -1,0 +1,59 @@
+name: ClearYourInv
+main: ClearYourInv\Main
+author: Martin77Epic
+api: [1.0.0, 2.0.0, 1.15.0]
+version: 1.0.0
+load: POSTWORLD
+description: This plugin Clear your Inventory!
+
+commands:
+  ci:
+    description: Clear your inventory!
+    usage: "Usage: /ci"
+    permission: m77e.ci
+permissions:
+  m77e.ci:
+    description: "Allows the user to run /ci command"
+    default: op
+<?php
+
+namespace ClearYourInv;
+
+
+use pocketmine\command\ConsoleCommandSender;
+use pocketmine\plugin\PluginBase;
+use pocketmine\utils\TextFormat;
+use pocketmine\command\CommandSender;
+use pocketmine\command\Command;
+use pocketmine\inventory\PlayerInventory;
+use pocketmine\inventory\Inventory;
+use pocketmine\event\Listener;
+
+class Main extends PluginBase implements Listener
+{
+    public function onEnable()
+    {
+        $this->getLogger()->info(TextFormat::AQUA . "ClearYourInv enabled");
+    }
+    public function onDisable()
+    {
+        $this->getLogger()->info(TextFormat::AQUA . "ClearYourInv disabled");
+    }
+    public function onCommand(CommandSender $sender, Command $command, $label, array $args)
+    {
+        switch ($command->getName()){
+            case "ci":
+                if (!($sender instanceof ConsoleCommandSender)){
+                    $sender->sendMessage(TextFormat::RED . "You can use this command only in-game!");
+                    
+                } 
+                    if (!($sender instanceof Player)) {
+                        if ($sender->hasPermission(m77e.ci)){
+                        $sender->sendMessage(TextFormat::GREEN . "Succesfully cleared your Inventory!");
+                        $sender->getInventory()->clearAll();
+                    }
+                }
+        }
+    }
+
+}

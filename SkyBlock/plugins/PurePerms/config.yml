@@ -1,0 +1,16 @@
+---
+data-provider: yamlv1
+default-language: en
+disable-op: false
+enable-multiworld-perms: false
+enable-noeul-sixtyfour: false
+mysql-settings:
+  host: 127.0.0.1
+  port: 3306
+  user: root
+  password: 19283746
+  db: mine102pe
+noeul-minimum-pw-length: 6
+superadmin-ranks:
+- OP
+...

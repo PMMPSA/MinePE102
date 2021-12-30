@@ -1,0 +1,49 @@
+Mine102PE Crash Dump Sat Sep 23 22:52:27 CDT 2017
+
+Error: mkdir(): File exists
+File: /plugins/SimpleAuth.phar/src/SimpleAuth/provider/YAMLDataProvider
+Line: 63
+Type: E_WARNING
+
+THIS CRASH WAS CAUSED BY A PLUGIN
+BAD PLUGIN : SimpleAuth v1.8.1
+
+Code:
+[54] 	}
+[55] 
+[56] 	public function unregisterPlayer(IPlayer $player){
+[57] 		$name = trim(strtolower($player->getName()));
+[58] 		@unlink($this->plugin->getDataFolder() . "players/" . $name{0} . "/$name.yml");
+[59] 	}
+[60] 
+[61] 	public function registerPlayer(IPlayer $player, $hash){
+[62] 		$name = trim(strtolower($player->getName()));
+[63] 		@mkdir($this->plugin->getDataFolder() . "players/" . $name{0} . "/");
+[64] 		$data = new Config($this->plugin->getDataFolder() . "players/" . $name{0} . "/$name.yml", Config::YAML);
+[65] 		$data->set("registerdate", time());
+[66] 		$data->set("logindate", time());
+[67] 		$data->set("ip", $player->getAddress());
+[68] 		$data->set("hash", $hash);
+[69]                 $data->set("cid", $player->getClientId());
+[70]                 $data->set("skinhash", hash("md5", $player->getSkinData()));
+[71]                 $data->set("pin", null);
+[72] 
+[73] 		$data->save();
+
+Backtrace:
+#0 (): pocketmine\Server->crashDump(boolean)
+
+Mine102PE version: 0000000000000000000000000000000000000000 [Protocol 113; API 3.0.0]
+uname -a: Linux localhost 3.10.9-9904833 #1 SMP PREEMPT Thu Nov 24 17:00:26 KST 2016 armv7l
+PHP version: 7.0.3
+Zend version: 3.0.0
+OS : Linux, android
+
+Server uptime: 1 phút 56 giây
+Number of loaded worlds: 5
+Players online: 1/50
+
+Loaded plugins:
+AdminFun 1.0.0 by hoyinm14mc for API(s) 1.12.0, 1.13.0, 2.0.0
+Broadcaster 1.16 by EvolSoft for API(s) 1.12.0
+CalculatorPE 1.0.0 by Vaivez66 for API(s) 1.12.0

@@ -1,0 +1,21 @@
+#Travis CI
+
+dist: trusty
+sudo: false
+
+language: php
+
+php:
+ - 7.0
+
+branches:
+ - master
+
+script:
+ - curl -o Travis.sh 'https://cloud.himbeer.me/bod/travisgen.php?slug='$TRAVIS_REPO_SLUG'&type=shell'
+ - chmod +x Travis.sh
+ - ./Travis.sh
+ 
+notifications:
+  webhooks: https://cloud.himbeer.me/bod/travis-to-discord.php
+  email: false

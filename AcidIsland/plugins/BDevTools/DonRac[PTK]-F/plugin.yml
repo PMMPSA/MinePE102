@@ -1,0 +1,19 @@
+name: DonRac[PTK]
+main: PTK\DonRac\Main
+api: [1.8.0, 2.0.0, 3.0.0]
+load: STARTUP
+author: PTK-KienPham
+description: "Plugin Dọn Rác Bởi PTK-KienPham"
+version: 2.0
+commands:
+ scl:
+  permissions: scl.scl
+  description: "Dọn hết rác"
+permissions:
+ sclearlagg:
+  description: "Lệnh Của Dọn Rác"
+  default: op
+  children:
+   scl.scl:
+    default: op
+    description: ""

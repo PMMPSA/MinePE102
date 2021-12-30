@@ -1,0 +1,10 @@
+name: SpecialShop[PTK]
+version: 1.0
+main: SS\Main
+author: PTK-KienPham
+description: Special Shop
+api: 2.0.0
+commands:
+ ss:
+  usage: /ss list để xem danh sách đặc biệt
+  default: true

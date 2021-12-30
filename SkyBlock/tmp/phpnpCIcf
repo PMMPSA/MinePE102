@@ -1,0 +1,992 @@
+name: MyPlot
+main: MyPlot\MyPlot
+version: 1.1.7
+api:
+- 3.0.0
+- 3.0.0-ALPHA8
+authors:
+ - Wiez
+ - Exxarion
+ - jasonwynn10
+description: "Plots and Protection Plugin for PMMP Servers"
+load: STARTUP
+softdepend:
+- EconomyAPI
+- PocketMoney
+- EssentialsPE
+- EconomyPlus
+extensions:
+- sqlite3
+- mysqli
+- yaml
+permissions:
+    myplot.command:
+        default: op
+        children:
+            myplot.command.help:
+                default: true
+            myplot.command.claim:
+                default: true
+            myplot.command.info:
+                default: true
+            myplot.command.generate:
+                default: op
+            myplot.command.addhelper:
+                default: true
+            myplot.command.removehelper:
+                default: true
+            myplot.command.denyplayer:
+                default: true
+            myplot.command.undenyplayer:
+                default: true
+            myplot.command.auto:
+                default: true
+            myplot.command.clear:
+                default: true
+            myplot.command.dispose:
+                default: true
+            myplot.command.reset:
+                default: true
+            myplot.command.biome:
+                default: true
+            myplot.command.biomes:
+                default: true
+            myplot.command.home:
+                default: true
+            myplot.command.homes:
+                default: true
+            myplot.command.name:
+                default: true
+            myplot.command.give:
+                default: true
+            myplot.command.warp:
+                default: true
+            myplot.command.done:
+                default: true
+            myplot.command.middle:
+                default: true
+            myplot.command.list:
+                default: true
+    myplot.admin:
+        default: op
+        children:
+            myplot.admin.clear:
+                default: op
+            myplot.admin.biome:
+                default: op
+            myplot.admin.biomes:
+                defualt: op
+            myplot.admin.dispose:
+                default: op
+            myplot.admin.reset:
+                default: op
+            myplot.admin.addhelper:
+                default: op
+            myplot.admin.removehelper:
+                default: op
+            myplot.admin.denyplayer:
+                default: op
+            myplot.admin.undenyplayer:
+                default: op
+            myplot.admin.bypassdeny:
+                default: op
+            myplot.admin.build:
+                default: op
+                children:
+                    myplot.admin.build.plot:
+                        default: op
+                    myplot.admin.build.road:
+                        default: op
+            myplot.admin.name:
+                default: op
+            myplot.admin.warp:
+                default: op
+            myplot.admin.done:
+                default: op
+            myplot.admin.middle:
+                default: true
+            myplot.admin.list:
+                default: op
+    myplot.claimplots:
+        default: op
+        children:
+            myplot.claimplots.2:
+                default: true
+            myplot.claimplots.unlimited:
+                default: op
+<?php
+namespace MyPlot;
+
+use MyPlot\provider\EconomyPlusProvider;
+use MyPlot\provider\EconomySProvider;
+use MyPlot\provider\EssentialsPEProvider;
+use MyPlot\provider\JSONDataProvider;
+use MyPlot\provider\MySQLProvider;
+use MyPlot\provider\PocketMoneyProvider;
+use MyPlot\provider\YAMLDataProvider;
+use MyPlot\task\ClearPlotTask;
+use MyPlot\provider\DataProvider;
+use MyPlot\provider\SQLiteDataProvider;
+use MyPlot\provider\EconomyProvider;
+
+use onebone\economyapi\EconomyAPI;
+
+use EssentialsPE\Loader;
+
+use PocketMoney\PocketMoney;
+
+use ImagicalGamer\EconomyPlus\Main;
+
+use pocketmine\event\level\LevelLoadEvent;
+use pocketmine\lang\BaseLang;
+use pocketmine\level\format\Chunk;
+use pocketmine\level\generator\biome\Biome;
+use pocketmine\level\Position;
+use pocketmine\permission\Permission;
+use pocketmine\plugin\PluginBase;
+use pocketmine\level\generator\Generator;
+use pocketmine\Player;
+use pocketmine\level\Level;
+use pocketmine\utils\TextFormat as TF;
+
+use MyPlot\spoondetector\SpoonDetector;
+
+class MyPlot extends PluginBase
+{
+
+	/** @var PlotLevelSettings[] $levels */
+	private $levels = [];
+
+	/** @var DataProvider $dataProvider */
+	private $dataProvider = null;
+
+	/** @var EconomyProvider $economyProvider */
+	private $economyProvider = null;
+
+	/** @var BaseLang $baseLang */
+	private $baseLang = null;
+
+	/**
+	 * @api
+	 * @return BaseLang
+	 */
+	public function getLanguage() : BaseLang {
+		return $this->baseLang;
+	}
+
+	/**
+	 * Returns the DataProvider that is being used
+	 *
+	 * @api
+	 * @return DataProvider
+	 */
+	public function getProvider() : DataProvider {
+		return $this->dataProvider;
+	}
+
+	/**
+	 * Returns the EconomyProvider that is being used
+	 *
+	 * @api
+	 * @return EconomyProvider
+	 */
+	public function getEconomyProvider() {
+		return $this->economyProvider;
+	}
+
+	/**
+	 * Returns a PlotLevelSettings object which contains all the settings of a level
+	 *
+	 * @api
+	 * @param string $levelName
+	 * @return PlotLevelSettings|null
+	 */
+	public function getLevelSettings(string $levelName) {
+		if (isset($this->levels[$levelName])) {
+			return $this->levels[$levelName];
+		}
+		return null;
+	}
+
+	/**
+	 * Checks if a plot level is loaded
+	 *
+	 * @api
+	 * @param string $levelName
+	 * @return bool
+	 */
+	public function isLevelLoaded(string $levelName) : bool {
+		return isset($this->levels[$levelName]);
+	}
+
+	/**
+	 * Generate a new plot level with optional settings
+	 *
+	 * @api
+	 * @param string $levelName
+	 * @param array $settings
+	 * @return bool
+	 */
+	public function generateLevel(string $levelName, array $settings = []) {
+		if ($this->getServer()->isLevelGenerated($levelName) === true) {
+			return false;
+		}
+		if (empty($settings)) {
+			$settings = $this->getConfig()->get("DefaultWorld");
+		}
+		$settings = [
+			"preset" => json_encode($settings)
+		];
+		return $this->getServer()->generateLevel($levelName, null, MyPlotGenerator::class, $settings);
+	}
+
+	/**
+	 * Saves provided plot if changed
+	 *
+	 * @api
+	 * @param Plot $plot
+	 * @return bool
+	 */
+	public function savePlot(Plot $plot) : bool {
+		return $this->dataProvider->savePlot($plot);
+	}
+
+	/**
+	 * Get all the plots a player owns (in a certain level if $levelName is provided)
+	 *
+	 * @api
+	 * @param string $username
+	 * @param string $levelName
+	 * @return Plot[]
+	 */
+	public function getPlotsOfPlayer(string $username, string $levelName) : array {
+		return $this->dataProvider->getPlotsByOwner($username, $levelName);
+	}
+
+	/**
+	 * Get the next free plot in a level
+	 *
+	 * @api
+	 * @param string $levelName
+	 * @param int $limitXZ
+	 * @return Plot|null
+	 */
+	public function getNextFreePlot(string $levelName, int $limitXZ = 0) {
+		return $this->dataProvider->getNextFreePlot($levelName, $limitXZ);
+	}
+
+	/**
+	 * Finds the plot at a certain position or null if there is no plot at that position
+	 *
+	 * @api
+	 * @param Position $position
+	 * @return Plot|null
+	 */
+	public function getPlotByPosition(Position $position) {
+		$x = $position->x;
+		$z = $position->z;
+		$levelName = $position->level->getName();
+
+		$plotLevel = $this->getLevelSettings($levelName);
+		if ($plotLevel === null) {
+			return null;
+		}
+
+		$plotSize = $plotLevel->plotSize;
+		$roadWidth = $plotLevel->roadWidth;
+		$totalSize = $plotSize + $roadWidth;
+
+		if ($x >= 0) {
+			$X = floor($x / $totalSize);
+			$difX = $x % $totalSize;
+		}else{
+			$X = ceil(($x - $plotSize + 1) / $totalSize);
+			$difX = abs(($x - $plotSize + 1) % $totalSize);
+		}
+
+		if ($z >= 0) {
+			$Z = floor($z / $totalSize);
+			$difZ = $z % $totalSize;
+		}else{
+			$Z = ceil(($z - $plotSize + 1) / $totalSize);
+			$difZ = abs(($z - $plotSize + 1) % $totalSize);
+		}
+
+		if (($difX > $plotSize - 1) or ($difZ > $plotSize - 1)) {
+			return null;
+		}
+
+		return $this->dataProvider->getPlot($levelName, $X, $Z);
+	}
+
+	/**
+	 *  Get the begin position of a plot
+	 *
+	 * @api
+	 * @param Plot $plot
+	 * @return Position|null
+	 */
+	public function getPlotPosition(Plot $plot) {
+		$plotLevel = $this->getLevelSettings($plot->levelName);
+		if ($plotLevel === null) {
+			return null;
+		}
+
+		$plotSize = $plotLevel->plotSize;
+		$roadWidth = $plotLevel->roadWidth;
+		$totalSize = $plotSize + $roadWidth;
+		$x = $totalSize * $plot->X;
+		$z = $totalSize * $plot->Z;
+		$level = $this->getServer()->getLevelByName($plot->levelName);
+		return new Position($x, $plotLevel->groundHeight, $z, $level);
+	}
+
+	/**
+	 * Teleport a player to a plot
+	 *
+	 * @api
+	 * @param Player $player
+	 * @param Plot $plot
+	 * @return bool
+	 */
+	public function teleportPlayerToPlot(Player $player, Plot $plot) : bool {
+		$plotLevel = $this->getLevelSettings($plot->levelName);
+		if ($plotLevel === null) {
+			return false;
+		}
+		$pos = $this->getPlotPosition($plot);
+		$plotSize = $plotLevel->plotSize;
+		$pos->add(floor($plotSize / 2), -1, 1);
+		$player->teleport($pos);
+		return true;
+	}
+
+	/**
+	 * Reset all the blocks inside a plot
+	 *
+	 * @api
+	 * @param Plot $plot
+	 * @param int $maxBlocksPerTick
+	 * @return bool
+	 */
+	public function clearPlot(Plot $plot, $maxBlocksPerTick = 256) : bool {
+		if (!$this->isLevelLoaded($plot->levelName)) {
+			return false;
+		}
+		foreach($this->getServer()->getLevelByName($plot->levelName)->getEntities() as $entity) {
+			$plotb = $this->getPlotByPosition($entity->getPosition());
+			if($plotb != null) {
+				if($plotb === $plot) {
+					if(!$entity instanceof Player) {
+						$entity->close();
+					}
+				}
+			}
+		}
+		$this->getServer()->getScheduler()->scheduleTask(new ClearPlotTask($this, $plot, $maxBlocksPerTick));
+		return true;
+	}
+
+	/**
+	 * Delete the plot data
+	 *
+	 * @param Plot $plot
+	 * @return bool
+	 */
+	public function disposePlot(Plot $plot) : bool {
+		return $this->dataProvider->deletePlot($plot);
+	}
+
+	/**
+	 * Clear and dispose a plot
+	 *
+	 * @param Plot $plot
+	 * @param int $maxBlocksPerTick
+	 * @return bool
+	 */
+	public function resetPlot(Plot $plot, int $maxBlocksPerTick = 256) : bool {
+		if ($this->disposePlot($plot)) {
+			return $this->clearPlot($plot, $maxBlocksPerTick);
+		}
+		return false;
+	}
+
+	/**
+	 * Changes the biome of a plot
+	 *
+	 * @api
+	 * @param Plot $plot
+	 * @param Biome $biome
+	 * @return bool
+	 */
+	public function setPlotBiome(Plot $plot, Biome $biome) : bool {
+		foreach($this->getPlotChunks($plot) as $chunk) {
+			if($chunk instanceof Chunk) {
+				for($x = 0; $x <= 16; $x++) {
+					for($z = 0; $z <= 16; $z++) {
+						$chunk->setBiomeId($x, $z, $biome->getId());
+						$chunk->setChanged(true);
+						foreach ($chunk->getEntities() as $entity) {
+							if($entity instanceof Player) {
+								$entity->onChunkChanged($chunk);
+								$entity->sendChunk($x, $z, $chunk);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		$plot->biome = $biome->getName();
+		$this->savePlot($plot);
+		return true;
+	}
+
+	/**
+	 * Returns the PlotLevelSettings of all the loaded levels
+	 *
+	 * @api
+	 * @return PlotLevelSettings[]
+	 */
+	public function getPlotLevels() : array {
+		return $this->levels;
+	}
+
+	/**
+	 * Returns the Chunks contained in a plot
+	 *
+	 * @param Plot $plot
+	 * @return Chunk[]
+	 */
+	public function getPlotChunks(Plot $plot) : array {
+		$plotLevel = $this->getLevelSettings($plot->levelName);
+		$level = $this->getServer()->getLevelByName($plot->levelName);
+		$pos = $this->getPlotPosition($plot);
+		$plotSize = $plotLevel->plotSize;
+		$xMax = $pos->x + $plotSize;
+		$zMax = $pos->z + $plotSize;
+
+		$chunkIndexes = [];
+		for ($x = $pos->x; $x < $xMax; $x++) {
+			for ($z = $pos->z; $z < $zMax; $z++) {
+				$index = Level::chunkHash($x >> 4, $z >> 4);
+				if (!in_array($index, $chunkIndexes)) {
+					$chunkIndexes[] = $index;
+				}
+				Level::getXZ($index, $pos->x, $pos->z);
+				if(!($chunk = $level->getChunk($pos->x, $pos->z)) instanceof Chunk) {
+					$this->getLogger()->error("The chunk isn't a valid chunk!");
+				}
+			}
+		}
+		$chunks = [];
+		foreach ($chunkIndexes as $index) {
+			Level::getXZ($index, $plot->X, $plot->Z);
+			$chunk = $level->getChunk($plot->X,$plot->Z);
+			$chunks[] = $chunk;
+		}
+
+		return $chunks;
+	}
+
+
+	/**
+	 * Get the maximum number of plots a player can claim
+	 *
+	 * @param Player $player
+	 * @return int
+	 */
+	public function getMaxPlotsOfPlayer(Player $player) : int {
+		if ($player->hasPermission("myplot.claimplots.unlimited"))
+			return PHP_INT_MAX;
+		/** @var Permission[] $perms */
+		$perms = array_merge($this->getServer()->getPluginManager()->getDefaultPermissions($player->isOp()),
+			$player->getEffectivePermissions());
+		$perms = array_filter($perms, function ($name) {
+			return (substr($name, 0, 18) === "myplot.claimplots.");
+		}, ARRAY_FILTER_USE_KEY);
+		if (count($perms) == 0)
+			return 0;
+		krsort($perms);
+		foreach ($perms as $name => $perm) {
+			$maxPlots = substr($name, 18);
+			if (is_numeric($maxPlots)) {
+				return $maxPlots;
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * Finds the exact center of the plot at ground level
+	 *
+	 * @param Plot $plot
+	 * @return Position|null
+	 */
+	public function getPlotMid(Plot $plot) {
+		$plotLevel = $this->getLevelSettings($plot->levelName);
+		if ($plotLevel === null) {
+			return null;
+		}
+
+		$plotSize = $plotLevel->plotSize;
+		$pos = $this->getPlotPosition($plot);
+		$pos = new Position($pos->getFloorX() + ($plotSize / 2) + 0.5, $pos->getFloorY() + 1, $pos->getFloorZ() + ($plotSize / 2) + 0.5);
+
+		return $pos;
+	}
+
+	/**
+	 * Teleports the player to the exact center of the plot at nearest open space to the ground level
+	 *
+	 * @param Plot $plot
+	 * @param Player $player
+	 * @return bool
+	 */
+	public function teleportMiddle(Player $player, Plot $plot) : bool {
+		$mid = $this->getPlotMid($plot);
+		if($mid == null) {
+			return false;
+		}
+		return $player->teleport($mid);
+	}
+
+	/* -------------------------- Non-API part -------------------------- */
+
+	public function onEnable() {
+		@mkdir($this->getDataFolder()); // for spoon detector
+		SpoonDetector::printSpoon($this, "spoon.txt");
+
+		$this->getLogger()->notice(TF::BOLD."Loading...");
+
+		$this->saveDefaultConfig();
+		$this->reloadConfig();
+
+		@mkdir($this->getDataFolder() . "worlds");
+
+		Generator::addGenerator(MyPlotGenerator::class, "myplot");
+
+		$lang = $this->getConfig()->get("language", BaseLang::FALLBACK_LANGUAGE);
+		$this->baseLang = new BaseLang($lang, $this->getFile() . "resources/");
+
+		// Initialize DataProvider
+		$cacheSize = $this->getConfig()->get("PlotCacheSize");
+		switch (strtolower($this->getConfig()->get("DataProvider"))) {
+			case "mysql":
+				$settings = $this->getConfig()->get("MySQLSettings");
+				$this->dataProvider = new MySQLProvider($this, $cacheSize, $settings);
+			break;
+			case "yaml":
+				$this->dataProvider = new YAMLDataProvider($this, $cacheSize);
+			break;
+			case "json":
+				$this->dataProvider = new JSONDataProvider($this, $cacheSize);
+			break;
+			case "sqlite3":
+			case "sqlite":
+			default:
+				$this->dataProvider = new SQLiteDataProvider($this, $cacheSize);
+			break;
+		}
+
+		// Initialize EconomyProvider
+		if ($this->getConfig()->get("UseEconomy") == true) {
+			if (($plugin = $this->getServer()->getPluginManager()->getPlugin("EconomyAPI")) !== null) {
+				if($plugin instanceof EconomyAPI) {
+					$this->economyProvider = new EconomySProvider($plugin);
+					$this->getLogger()->debug("Eco set to EconomySProvider");
+				}
+				$this->getLogger()->debug("Eco not instance of EconomyAPI");
+			} elseif (($plugin = $this->getServer()->getPluginManager()->getPlugin("EssentialsPE")) !== null) {
+				if($plugin instanceof Loader) {
+					$this->economyProvider = new EssentialsPEProvider($plugin);
+					$this->getLogger()->debug("Eco set to EssentialsPE");
+				}
+				$this->getLogger()->debug("Eco not instance of EssentialsPE");
+			} elseif (($plugin = $this->getServer()->getPluginManager()->getPlugin("PocketMoney")) !== null) {
+				if($plugin instanceof PocketMoney) {
+					$this->economyProvider = new PocketMoneyProvider($plugin);
+					$this->getLogger()->debug("Eco set to PocketMoney");
+				}
+				$this->getLogger()->debug("Eco not instance of PocketMoney");
+			} elseif(($plugin = $this->getServer()->getPluginManager()->getPlugin("EconomyPlus")) !== null) {
+				if($plugin instanceof Main) {
+					$this->economyProvider = new EconomyPlusProvider($plugin);
+					$this->getLogger()->debug("Eco set to EconomyPlus");
+				}
+				$this->getLogger()->debug("Eco not instance of EconomyPlus");
+			} else {
+				$this->getLogger()->info("No supported economy plugin found!");
+				$this->getConfig()->set("UseEconomy",false);
+			}
+		}
+
+		$eventListener = new EventListener($this);
+		$this->getServer()->getPluginManager()->registerEvents($eventListener, $this);
+		foreach($this->getServer()->getLevels() as $level) {
+			$eventListener->onLevelLoad(new LevelLoadEvent($level));
+		}
+		$this->getServer()->getCommandMap()->register(Commands::class, new Commands($this));
+		$this->getLogger()->notice(TF::GREEN."Enabled!");
+	}
+
+	public function addLevelSettings(string $levelName, PlotLevelSettings $settings) : bool {
+		$this->levels[$levelName] = $settings;
+		return true;
+	}
+
+	public function unloadLevelSettings(string $levelName) : bool {
+		if (isset($this->levels[$levelName])) {
+			unset($this->levels[$levelName]);
+			$this->getLogger()->debug("Level ".$levelName." settings unloaded!");
+			return true;
+		}
+		return false;
+	}
+
+	public function onDisable() {
+		if ($this->dataProvider !== null) {
+			$this->dataProvider->close();
+		}
+	}
+}
+<?php
+namespace MyPlot\spoondetector;
+
+use pocketmine\plugin\PluginBase;
+use pocketmine\Server;
+
+/**
+ * This class is deliberately meant to be silly
+ * Class SpoonDetector
+ * @package falkirks\simplewarp\utils
+ */
+class SpoonDetector{
+
+    private static $subtleAsciiSpoon = "   
+         ___ _ __   ___   ___  _ __  
+        / __| '_ \\ / _ \\ / _ \\| '_ \\ 
+        \\__ \\ |_) | (_) | (_) | | | |
+        |___/ .__/ \\___/ \\___/|_| |_|
+            | |                      
+            |_|                      
+    ";
+
+    private static $spoonTxtContent = "
+    The author of this plugin does not provide support for third-party builds of 
+    PocketMine-MP (spoons). Spoons detract from the overall quality of the MCPE plugin environment, which is already 
+    lacking in quality. They force plugin developers to waste time trying to support conflicting APIs.
+    
+    In order to begin using this plugin you must understand that you will be offered no support. 
+    
+    Furthermore, the GitHub issue tracker for this project is targeted at vanilla PocketMine only. Any bugs you create which don't affect vanilla PocketMine, will be deleted.
+    
+    Have you read and understood the above (type 'yes' after the question mark)?";
+
+    private static $thingsThatAreNotSpoons = [
+        'PocketMine-MP'
+    ];
+
+    public static function isThisSpoon() : bool {
+        return !in_array(Server::getInstance()->getName(), self::$thingsThatAreNotSpoons);
+    }
+
+    private static function contentValid(string $content): bool {
+        return (strpos($content, self::$spoonTxtContent) !== false) && (strrpos($content, "yes") > strrpos($content, "?"));
+    }
+
+    public static function printSpoon(PluginBase $pluginBase, $fileToCheck){
+        if(self::isThisSpoon()){
+            if(!file_exists($pluginBase->getDataFolder() . $fileToCheck)){
+                file_put_contents($pluginBase->getDataFolder() . $fileToCheck, self::$spoonTxtContent);
+            }
+            if(!self::contentValid(file_get_contents($pluginBase->getDataFolder() . $fileToCheck))) {
+                $pluginBase->getLogger()->info(self::$subtleAsciiSpoon);
+                $pluginBase->getLogger()->warning("You are attempting to run " . $pluginBase->getDescription()->getName() . " on a SPOON!");
+                $pluginBase->getLogger()->warning("Before using the plugin you will need to open /plugins/" . $pluginBase->getDescription()->getName() . "/" . $fileToCheck . " in a text editor and agree to the terms.");
+                $pluginBase->getServer()->getPluginManager()->disablePlugin($pluginBase);
+            }
+        }
+    }
+
+}
+#########################################
+# ___  ___       ______  _         _    #
+# |  \/  |       | ___ \| |       | |   #
+# | .  . | _   _ | |_/ /| |  ___  | |_  #
+# | |\/| || | | ||  __/ | | / _ \ | __| #
+# | |  | || |_| || |    | || (_) || |_  #
+# \_|  |_/ \__, |\_|    |_| \___/  \__| #
+#           __/ |                       #
+#          |___/                        #
+#########################################
+
+# The language that should be used in MyPlot
+# Available languages: eng, nl, vi, spa, chs, zho, deu, cze
+#
+# English language pack by @jasonwynn10
+# Dutch language pack by @Wies
+# Vietnamese language pack by @daany123
+# Spanish language pack by @thelucyclub
+# Chinese ( ROC ) pack by @jerryzooyoyo
+# Chinese ( PRC ) pack by @jerryzooyoyo
+# German language pack by @morpheusTP and @SalmonGER
+# Czech lanauge pack by @GamakCZ
+language: eng
+
+# The data provider where plot data is stored.
+# Current providers are: sqlite, mysql, json, and yaml.
+DataProvider: sqlite
+
+# contains settings for mysql provider to use when selected
+MySQLSettings:
+  Host: 127.0.0.1
+  Port: 3306
+  Username: default
+  Password: password
+  DatabaseName: MyPlot
+
+# Use an economy with MyPlot. This will allow for plot pricing such as claiming, clearing, etc.
+# Currently supported economy plugins: Economy$, PocketMoney
+# MyPlot will use any economy plugin found on the server.
+# Be sure not to use more than 1 economy plugin!
+UseEconomy: false
+
+# Amount of plots to be cached.
+# Increasing this number will improve performance, but also increase memory usage.
+PlotCacheSize: 256
+
+# When a player enters a plot, a popup with basic info will be shown
+ShowPlotPopup: true
+
+# Amount of blocks to reset per tick.
+# Increasing this number will speed up '/p clear' and '/p reset' but also increases lag
+ClearBlocksPerTick: 256
+
+# These settings will be used when creating a new world with the default generator.
+DefaultWorld:
+
+  # Restrict entities (e.g. tnt) from moving except falling
+  # This will prevent things like tnt cannons from ruining other plots
+  RestrictEntityMovement: true
+
+  # Update liquids (e.g. Water) from updating and moving
+  # This will allows things like water to lag the server in plot worlds
+  UpdatePlotLiquids: false
+
+  # How much it costs to claim a plot (Economy must be set to 'true')
+  ClaimPrice: 0
+  # How much it costs to clear a plot (Economy must be set to 'true')
+  ClearPrice: 0
+  # How much it costs to dispose a plot (Economy must be set to 'true')
+  DisposePrice: 0
+  # How much it costs to reset a plot (Economy must be set to 'true')
+  ResetPrice: 0
+
+  # The size of a plot
+  PlotSize: 32
+  # The height of a plot
+  GroundHeight: 64
+  # The width of the road
+  RoadWidth: 7
+
+  # The block that the road is made of (Default is Oak Planks)
+  RoadBlock: '5:0'
+  # The block that plot walls are made of (Default is Stone Slabs)
+  WallBlock: '44:0'
+  # The block used as the plot floor (Default is Grass)
+  PlotFloorBlock: '2:0'
+  # The block that fills the rest of the plot (Default is Dirt)
+  PlotFillBlock: '3:0'
+  # The block at the bottom (Default is Bedrock)
+  BottomBlock: '7:0'<?php
+namespace MyPlot;
+
+use pocketmine\block\Block;
+use pocketmine\level\generator\Generator;
+use pocketmine\level\ChunkManager;
+use pocketmine\math\Vector3;
+use pocketmine\utils\Random;
+use pocketmine\level\Level;
+
+class MyPlotGenerator extends Generator
+{
+	/** @var ChunkManager $level */
+	private $level;
+	/** @var string[] $settings */
+	private $settings;
+
+	/** @var Block */
+	public $roadBlock, $wallBlock, $plotFloorBlock, $plotFillBlock, $bottomBlock;
+	/** @var int */
+	public $roadWidth = 7, $plotSize = 32, $groundHeight = 64;
+
+	const PLOT = 0;
+	const ROAD = 1;
+	const WALL = 2;
+
+	public function __construct(array $settings = []) {
+		if (isset($settings["preset"])) {
+			$settings = json_decode($settings["preset"], true);
+			if ($settings === false) {
+				$settings = [];
+			}
+		} else {
+			$settings = [];
+		}
+		$this->roadBlock = PlotLevelSettings::parseBlock($settings, "RoadBlock", new Block(5));
+		$this->wallBlock = PlotLevelSettings::parseBlock($settings, "WallBlock", new Block(44));
+		$this->plotFloorBlock = PlotLevelSettings::parseBlock($settings, "PlotFloorBlock", new Block(2));
+		$this->plotFillBlock = PlotLevelSettings::parseBlock($settings, "PlotFillBlock", new Block(3));
+		$this->bottomBlock = PlotLevelSettings::parseBlock($settings, "BottomBlock", new Block(7));
+
+		$this->roadWidth = PlotLevelSettings::parseNumber($settings, "RoadWidth", 7);
+		$this->plotSize = PlotLevelSettings::parseNumber($settings, "PlotSize", 32);
+		$this->groundHeight = PlotLevelSettings::parseNumber($settings, "GroundHeight", 64);
+		$this->settings = [];
+		$this->settings["preset"] = json_encode([
+			"RoadBlock" => $this->roadBlock->getId() . (($meta = $this->roadBlock->getDamage()) === 0 ? '' : ':'.$meta),
+			"WallBlock" => $this->wallBlock->getId() . (($meta = $this->wallBlock->getDamage()) === 0 ? '' : ':'.$meta),
+			"PlotFloorBlock" => $this->plotFloorBlock->getId() . (($meta = $this->plotFloorBlock->getDamage()) === 0 ? '' : ':'.$meta),
+			"PlotFillBlock" => $this->plotFillBlock->getId() . (($meta =$this->plotFillBlock->getDamage()) === 0 ? '' : ':'.$meta),
+			"BottomBlock" => $this->bottomBlock->getId() . (($meta = $this->bottomBlock->getDamage()) === 0 ? '' : ':'.$meta),
+			"RoadWidth" => $this->roadWidth,
+			"PlotSize" => $this->plotSize,
+			"GroundHeight" => $this->groundHeight
+		]);
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getName() : string {
+		return "myplot";
+	}
+
+	/**
+	 * @return string[]
+	 */
+	public function getSettings() : array {
+		return $this->settings;
+	}
+
+	/**
+	 * @param ChunkManager $level
+	 * @param Random $random
+	 */
+	public function init(ChunkManager $level, Random $random) {
+		$this->level = $level;
+	}
+
+	/**
+	 * @param int $chunkX
+	 * @param int $chunkZ
+	 */
+	public function generateChunk(int $chunkX, int $chunkZ) {
+		$shape = $this->getShape($chunkX << 4, $chunkZ << 4);
+		$chunk = $this->level->getChunk($chunkX, $chunkZ);
+
+		$bottomBlockId = $this->bottomBlock->getId();
+		$bottomBlockMeta = $this->bottomBlock->getDamage();
+		$plotFillBlockId = $this->plotFillBlock->getId();
+		$plotFillBlockMeta = $this->plotFillBlock->getDamage();
+		$plotFloorBlockId = $this->plotFloorBlock->getId();
+		$plotFloorBlockMeta = $this->plotFloorBlock->getDamage();
+		$roadBlockId = $this->roadBlock->getId();
+		$roadBlockMeta = $this->roadBlock->getDamage();
+		$wallBlockId = $this->wallBlock->getId();
+		$wallBlockMeta = $this->wallBlock->getDamage();
+		$groundHeight = $this->groundHeight;
+
+		for ($Z = 0; $Z < 16; ++$Z) {
+			for ($X = 0; $X < 16; ++$X) {
+				$chunk->setBiomeId($X, $Z, 1);
+				$chunk->setBlock($X, 0, $Z, $bottomBlockId, $bottomBlockMeta);
+				for ($y = 1; $y < $groundHeight; ++$y) {
+					$chunk->setBlock($X, $y, $Z, $plotFillBlockId, $plotFillBlockMeta);
+				}
+				$type = $shape[($Z << 4) | $X];
+				if ($type === self::PLOT) {
+					$chunk->setBlock($X, $groundHeight, $Z, $plotFloorBlockId, $plotFloorBlockMeta);
+				} elseif ($type === self::ROAD) {
+					$chunk->setBlock($X, $groundHeight, $Z, $roadBlockId, $roadBlockMeta);
+				} else {
+					$chunk->setBlock($X, $groundHeight, $Z, $roadBlockId, $roadBlockMeta);
+					$chunk->setBlock($X, $groundHeight + 1, $Z, $wallBlockId, $wallBlockMeta);
+				}
+			}
+		}
+		$chunk->setX($chunkX);
+		$chunk->setZ($chunkZ);
+		$chunk->setGenerated();
+		$this->level->setChunk($chunkX, $chunkZ, $chunk);
+	}
+
+	/**
+	 * @param int $x
+	 * @param int $z
+	 * @return \SplFixedArray
+	 */
+	public function getShape(int $x, int $z) {
+		$totalSize = $this->plotSize + $this->roadWidth;
+		if ($x >= 0) {
+			$X = $x % $totalSize;
+		} else {
+			$X = $totalSize - abs($x % $totalSize);
+		}
+		if ($z >= 0) {
+			$Z = $z % $totalSize;
+		} else {
+			$Z = $totalSize - abs($z % $totalSize);
+		}
+		$startX = $X;
+		$shape = new \SplFixedArray(256);
+		for ($z = 0; $z < 16; $z++, $Z++) {
+			if ($Z === $totalSize) {
+				$Z = 0;
+			}
+			if ($Z < $this->plotSize) {
+				$typeZ = self::PLOT;
+			} elseif ($Z === $this->plotSize or $Z === ($totalSize-1)) {
+				$typeZ = self::WALL;
+			} else {
+				$typeZ = self::ROAD;
+			}
+			for ($x = 0, $X = $startX; $x < 16; $x++, $X++) {
+				if ($X === $totalSize)
+					$X = 0;
+				if ($X < $this->plotSize) {
+					$typeX = self::PLOT;
+				} elseif ($X === $this->plotSize or $X === ($totalSize-1)) {
+					$typeX = self::WALL;
+				} else {
+					$typeX = self::ROAD;
+				}
+				if ($typeX === $typeZ) {
+					$type = $typeX;
+				} elseif ($typeX === self::PLOT) {
+					$type = $typeZ;
+				} elseif ($typeZ === self::PLOT) {
+					$type = $typeX;
+				} else {
+					$type = self::ROAD;
+				}
+				$shape[($z << 4)| $x] = $type;
+			}
+		}
+		return $shape;
+	}
+
+	/**
+	 * @param int $chunkX
+	 * @param int $chunkZ
+	 */
+	public function populateChunk(int $chunkX, int $chunkZ) {}
+
+	/**
+	 * @return Vector3
+	 */
+	public function getSpawn() : Vector3 {
+		return new Vector3(0, $this->groundHeight+1, 0);
+	}
+}

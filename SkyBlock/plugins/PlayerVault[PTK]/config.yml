@@ -1,0 +1,11 @@
+---
+provider: json
+mysql:
+  ip: 127.0.0.1
+  user: root
+  pass: 19283746
+  database: vault
+  port: 3306
+max-vaults: 25
+vaultinv-name: 'Két §l§fSắt§r #{VAULTNO}'
+...

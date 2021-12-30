@@ -1,0 +1,28 @@
+---
+version: 1
+blocks:
+- x: 111
+  "y": 5
+  z: 155
+  level: Shop
+  commands:
+  - hub
+- x: 114
+  "y": 5
+  z: 155
+  level: Shop
+  commands:
+  - hub
+- x: 93
+  "y": 65
+  z: 94
+  level: AcidIsland
+  commands:
+  - kill
+- x: 48
+  "y": 52
+  z: 15
+  level: Hub
+  commands:
+  - warp quayso
+...

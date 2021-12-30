@@ -1,0 +1,38 @@
+---
+buy.money.success: '{prefix}Bạn đã mua lệnh {cmd} bằng {amount} XU!{line}{prefix}Từ
+  giờ bạn đã có thể sửa dụng lệnh này.'
+buy.money.miss: '{error}Bạn không đủ tiền để mua lệnh. Bạn cần có {amount} XU!'
+buy.item.success: '{prefix}You successfully bought the command {cmd} with the item
+  {item}!{line}{prefix}The command has already been executed.'
+buy.item.miss: '{error}You don''t have enough items to buy this command, items needed:{line}Item:
+  {item} Amount: {amount}'
+buy.contactadmin: '{line}If you are a normal user, please contact your server administrator!'
+command.notfound: '{error}Command {cmd} wasn''t found in the list of buyable commands!'
+sign.confirm: '{prefix}Chạm vào cái bảng 1 lần nữa để mua lệnh {cmd}!'
+sign.noperm: '{error}You don''t have the permission to buy commands via signs!'
+sign.nobreak: '{error}Bạn không thể phá bảng này!'
+buycmd.disabled: '{error}/buycmd is disabled for this buyable command!'
+commands:
+  Bay:
+    cmds:
+    - fly
+    buycmd: "true"
+    price:
+      paytype: money
+      amount: "100000000"
+  example:
+    cmds:
+    - tp {player} 123 123 123
+    buycmd: "true"
+    price:
+      paytype: item
+      item: 1:0:64
+  fly:
+    cmds:
+    - fly
+    buycmd: "true"
+    price:
+      paytype: money
+      amount: "99999999999"
+signs: []
+...

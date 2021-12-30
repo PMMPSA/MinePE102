@@ -1,0 +1,8 @@
+name: BaoLoi[PTK]
+version: 1.0
+api: [2.0.0, 3.0.0]
+main: BaoLoi\BaoLoi
+author: PTK-KienPham
+commands:
+ baoloi:
+  description: "Báo Lỗi"

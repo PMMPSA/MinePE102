@@ -1,0 +1,130 @@
+Mine102PE Crash Dump Fri Sep 22 05:56:51 CDT 2017
+
+Error: syntax error, unexpected '?'
+File: /plugins/MyPlot_dev-97.phar/src/MyPlot/MyPlot
+Line: 88
+Type: notice
+
+THIS CRASH WAS CAUSED BY A PLUGIN
+
+Code:
+[79] 	}
+[80] 
+[81] 	/**
+[82] 	 * Returns a PlotLevelSettings object which contains all the settings of a level
+[83] 	 *
+[84] 	 * @api
+[85] 	 * @param string $levelName
+[86] 	 * @return PlotLevelSettings|null
+[87] 	 */
+[88] 	public function getLevelSettings(string $levelName) : ?PlotLevelSettings {
+[89] 		if (isset($this->levels[$levelName])) {
+[90] 			return $this->levels[$levelName];
+[91] 		}
+[92] 		return null;
+[93] 	}
+[94] 
+[95] 	/**
+[96] 	 * Checks if a plot level is loaded
+[97] 	 *
+[98] 	 * @api
+
+Backtrace:
+#0 (): spl_autoload_call(string MyPlot\MyPlot)
+#1 /src/pocketmine/plugin/PharPluginLoader(63): class_exists(string MyPlot\MyPlot, boolean 1)
+#2 /src/pocketmine/plugin/PluginManager(159): pocketmine\plugin\PharPluginLoader->loadPlugin(string phar:///storage/emulated/0/Genisys/plugins/MyPlot_dev-97.phar)
+#3 /src/pocketmine/plugin/PluginManager(360): pocketmine\plugin\PluginManager->loadPlugin(string /storage/emulated/0/Genisys/plugins/MyPlot_dev-97.phar, array Array())
+#4 /src/pocketmine/Server(1896): pocketmine\plugin\PluginManager->loadPlugins(string /storage/emulated/0/Genisys/plugins/)
+#5 /src/pocketmine/PocketMine(496): pocketmine\Server->__construct(BaseClassLoader object, pocketmine\utils\MainLogger object, string /storage/emulated/0/Genisys/, string /storage/emulated/0/Genisys/, string /storage/emulated/0/Genisys/plugins/)
+
+Mine102PE version: 0000000000000000000000000000000000000000 [Protocol 113; API 3.0.0]
+uname -a: Linux localhost 3.10.9-9904833 #1 SMP PREEMPT Thu Nov 24 17:00:26 KST 2016 armv7l
+PHP version: 7.0.3
+Zend version: 3.0.0
+OS : Linux, android
+
+Server uptime: 2 giây
+Number of loaded worlds: 0
+Players online: 0/50
+
+Loaded plugins:
+AdminFun 1.0.0 by hoyinm14mc for API(s) 1.12.0, 1.13.0, 2.0.0
+Broadcaster 1.16 by EvolSoft for API(s) 1.12.0
+CalculatorPE 1.0.0 by Vaivez66 for API(s) 1.12.0
+ClearYourInv 1.0.0 by Martin77Epic for API(s) 1.0.0, 2.0.0, 1.15.0
+EasierTime 1.2 by Ad5001 for API(s) 2.0.0
+EconomyAPI 2.0.9 by onebone for API(s) 2.0.0
+NetherChests 1.1.1 by aliuly for API(s) 1.12.0
+InventorySize 1 by MaxFreeze for API(s) 2.0.0
+iProtector 3.1b by LDX for API(s) 1.9.0, 2.0.0
+KillChat 1.0.2.MOD by Array for API(s) 1.9.0, 2.0.0
+MisteryBox 1 by ISAAC300, ProjectTeamPHP for API(s) 2.0.0
+NoFrameDrop 1 by  for API(s) 3.0.0, 3.0.1, 3.0.0-ALPHA1, 3.0.0-ALPHA2, 3.0.0-ALPHA3, 3.0.0-ALPHA3, 3.0.0-ALPHA4, 3.0.0-ALPHA5, 3.0.0-ALPHA6
+PocketGuard 2.1.1 by MinecrafterJPN for API(s) 1.10.0
+SignModifier 1.0.0 by wolfdale for API(s) 1.3.1
+SimpleAuth 1.8.1 by PocketMine Team, shoghicp, awzaw for API(s) 2.0.0, 3.0.0-ALPHA1, 3.0.0-ALPHA2, 3.0.0-ALPHA3, 3.0.0-ALPHA4, 3.0.0-ALPHA5
+SimpleAuthHelper 2.0.1 by aliuly for API(s) 1.12.0
+TapToDo 2.2.1 by Falk for API(s) 1.0.0
+Titler 0.1.0 by Niekert for API(s) 3.0.0, 3.0.0-ALPHA5, 3.0.0-ALPHA6, 3.0.0-ALPHA7, 3.0.1
+AutoInv[PTK] 1.0.0 by PTK-KienPham for API(s) 1.0.0, 2.0.0
+BanSystem 1.0.3 by xXSuperFrostyXx, randy128gamer for API(s) 2.0.0, 2.1.0, 2.2.0, 2.3.0, 2.4.0
+BaoLoi[PTK] 1 by PTK-KienPham for API(s) 2.0.0, 3.0.0
+Bar 0.1v_beta by PTK-KienPham for API(s) 1.0.0, 2.0.0, 2.1.0, 3.0.0, 3.0.0-ALPHA1, 3.0.0-ALPHA2
+Bar2 0.1v_beta by PTK-KienPham for API(s) 1.0.0, 2.0.0, 2.1.0, 3.0.0, 3.0.0-ALPHA1, 3.0.0-ALPHA2
+BlockParticle 1 by PTK for API(s) 2.0.0, 3.0.0
+BlockSniper 1.3.4 by BlockHorizons for API(s) 2.0.0, 2.1.0, 3.0.0-ALPHA1, 3.0.0-ALPHA2, 3.0.0-ALPHA3, 3.0.0-ALPHA4
+BoGItem[PTK] 1 by PTK-KienPham for API(s) 2.0.0, 3.0.0
+BuyEc[PTK] 3 by  for API(s) 2.0.0, 3.0.0
+CellPE 2.0.0 by Vaivez66, Bajan for API(s) 3.0.0-ALPHA5, 3.0.0-ALPHA6, 3.0.0-ALPHA7
+ChatToolsPro 1.2 by paetti for API(s) 1.0.0, 2.0.0, 3.0.0, 3.0.0-ALPHA, 3.0.0-ALPHA1, 4.0.0, 5.0.0
+ChunkLightUpdate 1.0.0 by  for API(s) 3.0.0, 3.0.1, 3.0.0-ALPHA5, 3.0.0-ALPHA6
+CMDBlock 1.0.2 by  for API(s) 2.0.0, 3.0.0-ALPHA1, 3.0.0-ALPHA2, 3.0.0-ALPHA3, 3.0.0-ALPHA4, 3.0.0-ALPHA5
+CommandBlocker 1.5.5 by Thunder33345 for API(s) 2.0.0
+CommandShop 1.0.0 by BoxOfDevs Team for API(s) 2.0.0, 2.1.0, 3.0.0-ALPHA2, 3.0.0-ALPHA3, 3.0.0-ALPHA4, 3.0.0-ALPHA5, 3.0.0-ALPHA6
+CONSOLEChat 1.0.0 by TheNewHEROBRINE for API(s) 2.0.0
+CrateKeys 1.0.0 by  for API(s) 3.0.0-ALPHA5, 3.0.0-ALPHA6
+CustomAlerts 1.6 by EvolSoft for API(s) 1.12.0
+Dial[PTK] 0.3.1 by PTK-KienPham for API(s) 2.0.0
+DonRac[PTK] 2 by PTK-KienPham for API(s) 2.0.0, 3.0.0
+EconomyJob 2.0.4 by KienPham for API(s) 1.0.0, 2.0.0
+Feed[PTK] 1 by  for API(s) 2.0.0
+Firework[PTK] 1 by PTK-KienPham for API(s) 3.0.0
+FlyText[PTK] 1 by PTK-KienPham for API(s) 2.0.0, 3.0.0
+GiftCode[PTK] 2 by PTK-KienPham for API(s) 2.0.0, 3.0.0
+FactionsPro 1.0 rewrite by PTK-KienPham by Array for API(s) 1.14.0, 2.0.0
+Idea_Aro 1 by PVHB for API(s) 2.0.0
+Info[PTK] 2 by PTK-KienPham for API(s) 2.0.0
+InstantTree[KienPham] 0.2.0 by KienPham for API(s) 1.0.0, 2.0.0
+ItemCasePE 1.0.8 by aliuly for API(s) 1.10.0, 1.13.0
+ItemCloud 1.1 by KienPham for API(s) 1.4.0, 2.0.0
+ItemCommand 1 by Matrix for API(s) 1.12.0
+ItemName[PTK] 0.2german by PTK-KienPham for API(s) 2.0.0, 3.0.0, 3.0.0-ALPHA1, 3.0.0-ALPHA2, 3.0.0-ALPHA3
+JoinItems 1 by MaxFreeze for API(s) 2.0.0
+SETVIP 2.3 by MCPEVN TEAM for API(s) 3.0.0
+MagicWE 0.2.6 by thebigsmileXD for API(s) 1.13.0, 2.0.0
+ManyWorlds 2.1.0 by aliuly for API(s) 2.0.0
+MineReset 2.2 by Falk for API(s) 1.0.0, 2.0.0
+MSpawns 1.5 by EvolSoft for API(s) 2.0.0, 3.0.0-ALPHA1, 3.0.0-ALPHA2, 3.0.0-ALPHA3, 3.0.0-ALPHA4
+NameCorrector 1.0.0#build011 by PEMapModder for API(s) 1.8.0, 2.0.0
+TokenAPI 1 by lolcreepy_quando for API(s) 3.0.0
+Particles_Shape_BEcraft 1 by BEcraft Gameplay for API(s) 2.0.0, 2.1.0, 3.0.0, 3.0.0-ALPHA4, 3.0.0-ALPHA5
+PlayerShop[PTK] 3.0 by PTK-KienPham for API(s) 1.12.0, 2.0.0
+PlayerVault[PTK] 2 by PTK-KienPham for API(s) 2.0.0, 3.0.0, 3.0.0-ALPHA3, 3.0.0-ALPHA4, 3.0.0-ALPHA5, 3.0.0-ALPHA6, 3.0.0-ALPHA7, 3.0.0-ALPHA8
+PmChair[PTK] 1 by PTK-KienPham for API(s) 2.0.0, 3.0.0
+PurePerms 1.4.0 by PTK-KienPham for API(s) 2.0.0, 3.0.0
+Repair[PTK] 3 by PTK-KienPham for API(s) 2.0.0
+SignEnchant[PTK] 1 by KienPham for API(s) 1.0.0, 1.1.0, 1.2.0, 1.2.1, 3.0.0-ALPHA6, 3.0.0-ALPHA5, 3.0.0-ALPHA4, 2.0.0
+Slapper 1.5.0 by jojoe77777 for API(s) 3.0.0-ALPHA5, 3.0.0-ALPHA6, 3.0.1
+SlapperRotation 1.0.1 by jojoe77777 for API(s) 2.0.0, 2.1.0, 3.0.0-ALPHA1, 3.0.0-ALPHA2
+ToCao[PTK] 5 by PTK-KienPham for API(s) 2.0.0, 3.0.0, 3.0.0ALPHA5
+Tool[PTK] 2.0.0 by  for API(s) 2.1.0, 2.0.0
+WaterEffect[PTK] 1.1.0BETA by PTK-KienPham for API(s) 2.0.0, 3.0.0, 3.0.0-ALPHA5, b3.0.0-ALPHA6
+WorldFixer 1.0.1 by CreeperFace for API(s) 1.0.0, 2.0.0, 3.0.0, 3.0.0-ALPHA4, 3.0.0-ALPHA5, 3.0.0-ALPHA6
+WorldProtect[PTK] 1 by PTK-KienPham for API(s) 2.0.0, 3.0.0-ALPHA1, 3.0.0-ALPHA2, 3.0.0-ALPHA3, 3.0.0-ALPHA4, 3.0.0-ALPHA5
+Worlds 1.0.9 by  for API(s) 2.0.0, 3.0.0-ALPHA1, 3.0.0-ALPHA2, 3.0.0-ALPHA3, 3.0.0-ALPHA4, 3.0.0-ALPHA5
+SpecialShop[PTK] 1 by PTK-KienPham for API(s) 2.0.0
+EconomyLand 2.0.9 by onebone for API(s) 1.12.0
+EconomySell 2.0.7 by onebone for API(s) 1.12.0
+EconomyShop 2.0.7 by onebone for API(s) 1.12.0
+CombinedSlots 0.1.0 by jasonwynn10 for API(s) 3.0.0-ALPHA7
+GrabBag 2.3.0 by aliuly for API(s) 1.10.0, 1.11.0, 1.12.0
